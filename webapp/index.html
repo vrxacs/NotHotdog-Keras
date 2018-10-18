@@ -1,0 +1,60 @@
+<html>
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"> </script>
+  </head>
+  <body>
+    <h4>NotHotdog<hr/></h4>
+    <input id="image_upload" type="file"/>
+    <img id="image"/>
+    <div id="result"></div>
+
+    <script>
+
+    	var wait = ms => new Promise((r, j)=>setTimeout(r, ms));
+
+    	async function main() {
+			const model = await tf.loadModel('./model/model.json');
+
+			document.getElementById('image_upload').onchange = function(ev){
+	    		var f = ev.target.files[0];
+	   			var fr = new FileReader();
+
+	   			var makePrediction = async function(img) {
+	   				while(!img.complete){
+	   					await wait(100);
+	   				}
+
+	   				var tensor = tf.fromPixels(img).resizeNearestNeighbor([150,150]).toFloat().expandDims();
+
+	   				const prediction = model.predict(tensor);
+	   				
+
+	   				data = prediction.dataSync();
+
+	   				console.log(prediction);
+	   				prediction.print();
+	   				console.log(data);
+
+	   				document.getElementById('result').innerHTML = data[0];
+	   				console.log(data[0])
+	   			}
+
+	   			var fileReadComplete = function(ev2){
+	   				document.getElementById('image').src = ev2.target.result;
+				    var img = new Image();
+				    img.src = ev2.target.result;
+
+				    makePrediction(img);
+				};
+
+	   			fr.onload = fileReadComplete;
+	   			
+	   			fr.readAsDataURL(f);
+			}
+		}
+
+		main();
+
+    </script>
+  </body>
+</html>
