@@ -3,10 +3,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"> </script>
   </head>
   <body>
-    <h4>NotHotdog<hr/></h4>
-    <input id="image_upload" type="file"/>
-    <img id="image"/>
-    <div id="result"></div>
+    <h1>NotHotdog<hr/></h1>
+    <input id="image_upload" type="file"/></br>
+    <h3 id="result"></h3></br>
+    <img id="image" style="max-height: 500px"/>
 
     <script>
 
@@ -15,31 +15,26 @@
     	async function main() {
 			const model = await tf.loadModel('./model/model.json');
 
-			document.getElementById('image_upload').onchange = function(ev){
+			document.getElementById('image_upload').onchange = function(ev) {
 	    		var f = ev.target.files[0];
 	   			var fr = new FileReader();
 
 	   			var makePrediction = async function(img) {
-	   				while(!img.complete){
+	   				// We need to ensure that the image is actually loaded before we proceed.
+	   				while(!img.complete) {
 	   					await wait(100);
 	   				}
 
 	   				var tensor = tf.fromPixels(img).resizeNearestNeighbor([150,150]).toFloat().expandDims();
 
 	   				const prediction = model.predict(tensor);
-	   				
+  				
+	   				var data = prediction.dataSync();
+	   				document.getElementById('result').innerHTML = data[0] == 0 ? "Now, that's a hotdog! :)" : "Not hotdog! :(";
 
-	   				data = prediction.dataSync();
-
-	   				console.log(prediction);
-	   				prediction.print();
-	   				console.log(data);
-
-	   				document.getElementById('result').innerHTML = data[0];
-	   				console.log(data[0])
 	   			}
 
-	   			var fileReadComplete = function(ev2){
+	   			var fileReadComplete = function(ev2) {
 	   				document.getElementById('image').src = ev2.target.result;
 				    var img = new Image();
 				    img.src = ev2.target.result;
